@@ -1,5 +1,6 @@
 package net.yeputons.robotics.libs;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
@@ -10,15 +11,37 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class NxtBluetoothController {
-
-
     public interface MessageWriteListener {
         public void onMessageWrite(NxtBluetoothController controller, byte[] message);
+    }
+
+    public static BluetoothDevice findDeviceByName(String name) {
+        BluetoothAdapter adapter;
+        adapter = BluetoothAdapter.getDefaultAdapter();
+
+        Set<BluetoothDevice> pairedDevices;
+        pairedDevices = adapter.getBondedDevices();
+        BluetoothDevice result = null;
+        for (BluetoothDevice device : pairedDevices) {
+            String deviceName = device.getName();
+            if (deviceName.equals(name)) {
+                if (result != null) {
+                    throw new IllegalArgumentException("There are more than one device with name '" + name + "'");
+                }
+                result = device;
+            }
+        }
+        if (result == null) {
+            throw new NoSuchElementException();
+        }
+        return result;
     }
 
     final protected UUID NXT_SERVER_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // NXT's server UUID
