@@ -17,6 +17,17 @@ import java.io.IOException;
 public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
     protected Camera camera;
     protected CameraListener listener = null;
+    protected int cameraId;
+
+    private static int findCameraByFacing(int facing) {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+            Camera.getCameraInfo(i, info);
+            if (info.facing == facing)
+                return i;
+        }
+        return -1;
+    }
 
     public CameraSurface(Context context) {
         super(context);
@@ -41,7 +52,8 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        camera = Camera.open();
+        cameraId = findCameraByFacing(Camera.CameraInfo.CAMERA_FACING_BACK);
+        camera = Camera.open(cameraId);
 
         Camera.Parameters parameters = camera.getParameters();
 
@@ -61,28 +73,31 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
         camera.stopPreview();
 
         Camera.Parameters parameters = camera.getParameters();
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+
         size = parameters.getPreviewSize();
         argbBuffer = new int[size.width * size.height];
 
         Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
-        isPortrait = false;
+        // http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation%28int%29
+        int displayRotation = 0;
         switch (display.getRotation()) {
-            case Surface.ROTATION_0:
-                camera.setDisplayOrientation(90);
-                isPortrait = true;
-                break;
-            case Surface.ROTATION_90:
-                camera.setDisplayOrientation(0);
-                break;
-            case Surface.ROTATION_180:
-                camera.setDisplayOrientation(270);
-                isPortrait = true;
-                break;
-            case Surface.ROTATION_270:
-                camera.setDisplayOrientation(180);
-                break;
+            case Surface.ROTATION_0: displayRotation = 0; break;
+            case Surface.ROTATION_90: displayRotation = 90; break;
+            case Surface.ROTATION_180: displayRotation = 180; break;
+            case Surface.ROTATION_270: displayRotation = 270; break;
         }
+        int cameraDisplayOrientation;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            cameraDisplayOrientation = (info.orientation + displayRotation) % 360;
+            cameraDisplayOrientation = (360 - cameraDisplayOrientation) % 360;
+        } else {
+            cameraDisplayOrientation = (info.orientation - displayRotation + 360) % 360;
+        }
+        camera.setDisplayOrientation(cameraDisplayOrientation);
+        isPortrait = cameraDisplayOrientation % 180 == 90;
         requestLayout();
 
         if (listener != null)
