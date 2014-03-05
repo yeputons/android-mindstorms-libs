@@ -138,10 +138,6 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
         g = g > 255 ? 255 : g < 0 ? 0 : g;
         b = b > 255 ? 255 : b < 0 ? 0 : b;
 
-
-
-
-
         return 0xff000000 | (r << 16) | (g << 8) | b;
     }
 
