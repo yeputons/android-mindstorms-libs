@@ -10,7 +10,7 @@ import android.graphics.Canvas;
  * To change this template use File | Settings | File Templates.
  */
 public interface CameraListener {
-    public void onCameraFrame(byte[] data, int width, int height, boolean isPortrait, Canvas canvas);
+    public void onCameraFrame(byte[] data, int width, int height, int cameraDisplayOrientation, Canvas canvas);
 
-    public void onSizeChange(int width, int height, boolean isPortrait);
+    public void onSizeChange(int width, int height, int cameraDisplayOrientation);
 }

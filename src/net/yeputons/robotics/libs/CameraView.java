@@ -2,8 +2,10 @@ package net.yeputons.robotics.libs;
 
 import android.content.Context;
 import android.graphics.*;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 /**
@@ -54,28 +56,32 @@ public class CameraView extends ViewGroup {
 
         surface.setCameraListener(new CameraListener() {
             @Override
-            public void onCameraFrame(byte[] data, int width, int height, boolean isPortrait, Canvas _canvas) {
+            public void onCameraFrame(byte[] data, int width, int height, int cameraDisplayOrientation, Canvas _canvas) {
                 lastProcessingTime = System.currentTimeMillis() - lastTime;
                 lastTime = System.currentTimeMillis();
                 if (listener != null) {
-                    listener.onCameraFrame(data, width, height, isPortrait, canvas);
+                    listener.onCameraFrame(data, width, height, cameraDisplayOrientation, canvas);
                 }
                 drawer.setBitmapAndMatrix(toDraw, drawMatrix);
                 drawer.invalidate();
             }
 
             @Override
-            public void onSizeChange(int width, int height, boolean isPortrait) {
+            public void onSizeChange(int width, int height, int cameraDisplayOrientation) {
                 if (toDraw != null) toDraw.recycle();
                 toDraw = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 canvas = new Canvas(toDraw);
 
+                Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
                 drawMatrix = new Matrix();
-                if (isPortrait) {
-                    drawMatrix.postRotate(90);
-                    drawMatrix.postTranslate(height, 0);
+                drawMatrix.postRotate(cameraDisplayOrientation);
+                switch (cameraDisplayOrientation) {
+                    case 0: break;
+                    case 90: drawMatrix.postTranslate(height, 0); break;
+                    case 180: drawMatrix.postTranslate(width, height); break;
+                    case 270: drawMatrix.postTranslate(0, width); break;
                 }
-                if (!isPortrait) {
+                if (cameraDisplayOrientation % 180 == 0) {
                     preferredWidth = width;
                     preferredHeight = height;
                 } else {
@@ -88,7 +94,7 @@ public class CameraView extends ViewGroup {
                 );
 
                 if (listener != null)
-                    listener.onSizeChange(width, height, isPortrait);
+                    listener.onSizeChange(width, height, cameraDisplayOrientation);
             }
         });
     }

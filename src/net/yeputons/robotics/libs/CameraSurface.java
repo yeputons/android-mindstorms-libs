@@ -66,7 +66,7 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
 
     int[] argbBuffer;
     Camera.Size size;
-    boolean isPortrait;
+    int cameraDisplayOrientation;
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
@@ -97,11 +97,11 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
             cameraDisplayOrientation = (info.orientation - displayRotation + 360) % 360;
         }
         camera.setDisplayOrientation(cameraDisplayOrientation);
-        isPortrait = cameraDisplayOrientation % 180 == 90;
+        this.cameraDisplayOrientation = cameraDisplayOrientation;
         requestLayout();
 
         if (listener != null)
-            listener.onSizeChange(size.width, size.height, isPortrait);
+            listener.onSizeChange(size.width, size.height, cameraDisplayOrientation);
 
         camera.setPreviewCallbackWithBuffer(this);
         camera.addCallbackBuffer(new byte[estimateBufferSize(parameters)]);
@@ -121,7 +121,7 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
         if (listener != null)
-            listener.onCameraFrame(bytes, size.width, size.height, isPortrait, null);
+            listener.onCameraFrame(bytes, size.width, size.height, cameraDisplayOrientation, null);
         camera.addCallbackBuffer(bytes);
     }
 
