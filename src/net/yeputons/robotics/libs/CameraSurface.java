@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
     protected Camera camera;
-    protected CameraListener listener = null;
+    protected CameraListenerSimple listener = null;
     protected int cameraId;
 
     private static int findCameraByFacing(int facing) {
@@ -37,7 +37,7 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    public void setCameraListener(CameraListener listener) {
+    public void setCameraListener(CameraListenerSimple listener) {
         this.listener = listener;
     }
 

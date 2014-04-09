@@ -6,7 +6,6 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,6 +43,7 @@ public class CameraView extends ViewGroup {
     protected Canvas canvas;
     protected Matrix drawMatrix;
     protected int preferredWidth, preferredHeight;
+    protected CameraData cameraData;
     private long lastTime = Long.MIN_VALUE, lastProcessingTime = Long.MAX_VALUE;
 
     public CameraView(Context context) {
@@ -54,13 +54,16 @@ public class CameraView extends ViewGroup {
         drawer = new CameraDrawer(context);
         addView(drawer);
 
-        surface.setCameraListener(new CameraListener() {
+        surface.setCameraListener(new CameraListenerSimple() {
             @Override
             public void onCameraFrame(byte[] data, int width, int height, int cameraDisplayOrientation, Canvas _canvas) {
                 lastProcessingTime = System.currentTimeMillis() - lastTime;
                 lastTime = System.currentTimeMillis();
                 if (listener != null) {
+                    cameraData.setData(data);
                     listener.onCameraFrame(data, width, height, cameraDisplayOrientation, canvas);
+                    listener.onCameraFrame(cameraData, cameraDisplayOrientation, canvas);
+                    cameraData.setData(null);
                 }
                 drawer.setBitmapAndMatrix(toDraw, drawMatrix);
                 drawer.invalidate();
@@ -93,6 +96,7 @@ public class CameraView extends ViewGroup {
                         (float) getHeight() / preferredHeight
                 );
 
+                cameraData = new CameraData(width, height);
                 if (listener != null)
                     listener.onSizeChange(width, height, cameraDisplayOrientation);
             }

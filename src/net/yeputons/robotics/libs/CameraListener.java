@@ -4,13 +4,11 @@ import android.graphics.Canvas;
 
 /**
  * Created with IntelliJ IDEA.
- * User: Egor Suvorov
- * Date: 01.08.13
- * Time: 10:26
+ * User: user
+ * Date: 09.04.14
+ * Time: 20:53
  * To change this template use File | Settings | File Templates.
  */
-public interface CameraListener {
-    public void onCameraFrame(byte[] data, int width, int height, int cameraDisplayOrientation, Canvas canvas);
-
-    public void onSizeChange(int width, int height, int cameraDisplayOrientation);
+public interface CameraListener extends CameraListenerSimple {
+    public void onCameraFrame(CameraData data, int cameraDisplayOrientation, Canvas canvas);
 }
