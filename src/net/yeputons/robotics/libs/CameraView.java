@@ -36,6 +36,8 @@ public class CameraView extends ViewGroup {
         }
     }
 
+    public static final int DATA_ROTATION_AUTO = -1;
+
     protected CameraSurface surface;
     protected CameraDrawer drawer;
     protected CameraListener listener;
@@ -44,6 +46,7 @@ public class CameraView extends ViewGroup {
     protected Matrix drawMatrix;
     protected int preferredWidth, preferredHeight;
     protected CameraData cameraData;
+    private int dataRotation;
     private long lastTime = Long.MIN_VALUE, lastProcessingTime = Long.MAX_VALUE;
 
     public CameraView(Context context) {
@@ -53,6 +56,8 @@ public class CameraView extends ViewGroup {
 
         drawer = new CameraDrawer(context);
         addView(drawer);
+
+        dataRotation = 0;
 
         surface.setCameraListener(new CameraListenerSimple() {
             @Override
@@ -72,17 +77,28 @@ public class CameraView extends ViewGroup {
             @Override
             public void onSizeChange(int width, int height, int cameraDisplayOrientation) {
                 if (toDraw != null) toDraw.recycle();
-                toDraw = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                int bitmapWidth, bitmapHeight;
+                int currentDataRotation = dataRotation == DATA_ROTATION_AUTO ? cameraDisplayOrientation : dataRotation;                ;
+                if (currentDataRotation % 180 == 0) {
+                    bitmapWidth = width;
+                    bitmapHeight = height;
+                } else {
+                    bitmapWidth = height;
+                    bitmapHeight = width;
+                }
+
+                toDraw = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
                 canvas = new Canvas(toDraw);
 
+                int bitmapRotation = (cameraDisplayOrientation - currentDataRotation + 360) % 360;
                 Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
                 drawMatrix = new Matrix();
-                drawMatrix.postRotate(cameraDisplayOrientation);
-                switch (cameraDisplayOrientation) {
+                drawMatrix.postRotate(bitmapRotation);
+                switch (bitmapRotation) {
                     case 0: break;
-                    case 90: drawMatrix.postTranslate(height, 0); break;
-                    case 180: drawMatrix.postTranslate(width, height); break;
-                    case 270: drawMatrix.postTranslate(0, width); break;
+                    case 90: drawMatrix.postTranslate(bitmapHeight, 0); break;
+                    case 180: drawMatrix.postTranslate(bitmapWidth, bitmapHeight); break;
+                    case 270: drawMatrix.postTranslate(0, bitmapWidth); break;
                 }
                 if (cameraDisplayOrientation % 180 == 0) {
                     preferredWidth = width;
@@ -96,11 +112,24 @@ public class CameraView extends ViewGroup {
                         (float) getHeight() / preferredHeight
                 );
 
-                cameraData = new CameraData(width, height);
+                cameraData = new CameraData(width, height, currentDataRotation);
                 if (listener != null)
                     listener.onSizeChange(width, height, cameraDisplayOrientation);
             }
         });
+    }
+
+    public void setDataRotation(int newRotation) {
+        if (newRotation != DATA_ROTATION_AUTO) {
+            newRotation %= 360;
+            if (newRotation < 0) newRotation += 360;
+            if (newRotation % 90 != 0)
+                throw new IllegalArgumentException("New rotation should be either DATA_ROTATION_AUTO or divisible by 90");
+        }
+        dataRotation = newRotation;
+    }
+    public int getDataRotation() {
+        return dataRotation;
     }
 
     @Override
