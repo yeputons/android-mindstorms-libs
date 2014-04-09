@@ -43,7 +43,7 @@ public class CameraView extends ViewGroup {
     protected CameraListener listener;
     protected Bitmap toDraw;
     protected Canvas canvas;
-    protected Matrix drawMatrix;
+    protected Matrix drawMatrix, invDrawMatrix;
     protected int preferredWidth, preferredHeight;
     protected CameraData cameraData;
     private int dataRotation;
@@ -111,6 +111,11 @@ public class CameraView extends ViewGroup {
                         (float) getWidth() / preferredWidth,
                         (float) getHeight() / preferredHeight
                 );
+                invDrawMatrix = new Matrix();
+                if (!drawMatrix.invert(invDrawMatrix)) {
+                    invDrawMatrix = null;
+                }
+
 
                 cameraData = new CameraData(width, height, currentDataRotation);
                 if (listener != null)
@@ -130,6 +135,12 @@ public class CameraView extends ViewGroup {
     }
     public int getDataRotation() {
         return dataRotation;
+    }
+
+    public PointF convertCoordsViewToCamera(float x, float y) {
+        float[] data = { x, y };
+        invDrawMatrix.mapPoints(data);
+        return new PointF(data[0], data[1]);
     }
 
     @Override
