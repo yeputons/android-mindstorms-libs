@@ -78,7 +78,7 @@ public class CameraView extends ViewGroup {
             public void onSizeChange(int width, int height, int cameraDisplayOrientation) {
                 if (toDraw != null) toDraw.recycle();
                 int bitmapWidth, bitmapHeight;
-                int currentDataRotation = dataRotation == DATA_ROTATION_AUTO ? cameraDisplayOrientation : dataRotation;                ;
+                int currentDataRotation = dataRotation == DATA_ROTATION_AUTO ? cameraDisplayOrientation : dataRotation;
                 if (currentDataRotation % 180 == 0) {
                     bitmapWidth = width;
                     bitmapHeight = height;
