@@ -5,7 +5,7 @@ public class CameraData {
     private int dataWidth, dataHeight;
     private int width, height, dataRotation;
 
-    public CameraData(int width, int height, int dataRotation) {
+    CameraData(int width, int height, int dataRotation) {
         this.data = null;
         this.width = dataWidth = width;
         this.height = dataHeight = height;
