@@ -45,7 +45,9 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
         int format = parameters.getPreviewFormat();
         Camera.Size size = parameters.getPreviewSize();
 
-        assert (format != ImageFormat.YUY2);
+        if (format != ImageFormat.NV21) {
+            throw new RuntimeException("Invalid image format for camera preview");
+        }
         int bits = ImageFormat.getBitsPerPixel(format);
         return (size.width * size.height * bits + 7) / 8;
     }
