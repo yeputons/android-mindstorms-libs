@@ -131,9 +131,9 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
 
         int r, g, b;
 
-        r = y + (int) 1.772f * cr;
-        g = y - (int) (0.344f * cr + 0.714f * cb);
-        b = y + (int) 1.402f * cb;
+        r = (int)(y + 1.402 * cr);
+        g = (int)(y - 0.34414 * cb - 0.71414 * cr);
+        b = (int)(y + 1.772 * cb);
         r = r > 255 ? 255 : r < 0 ? 0 : r;
         g = g > 255 ? 255 : g < 0 ? 0 : g;
         b = b > 255 ? 255 : b < 0 ? 0 : b;
