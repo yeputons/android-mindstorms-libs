@@ -125,15 +125,15 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
         camera.addCallbackBuffer(bytes);
     }
 
-    public static int convertYuvToRgb(int y, int u, int v) {
-        u -= 128;
-        v -= 128;
+    public static int convertYCrCbToRgb(int y, int cr, int cb) {
+        cr -= 128;
+        cb -= 128;
 
         int r, g, b;
 
-        r = y + (int) 1.772f * u;
-        g = y - (int) (0.344f * u + 0.714f * v);
-        b = y + (int) 1.402f * v;
+        r = y + (int) 1.772f * cr;
+        g = y - (int) (0.344f * cr + 0.714f * cb);
+        b = y + (int) 1.402f * cb;
         r = r > 255 ? 255 : r < 0 ? 0 : r;
         g = g > 255 ? 255 : g < 0 ? 0 : g;
         b = b > 255 ? 255 : b < 0 ? 0 : b;
@@ -143,9 +143,9 @@ public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback
 
     public static int getColor(byte[] bytes, int x, int y, int width, int height) {
         int Y = bytes[y * width + x] & 0xFF;
-        int offUv = height * width + (y >> 1) * width + (x - (x & 1));
-        int U = bytes[offUv] & 0xFF;
-        int V = bytes[offUv + 1] & 0xFF;
-        return convertYuvToRgb(Y, U, V);
+        int offCrCb = height * width + (y >> 1) * width + (x - (x & 1));
+        int Cr = bytes[offCrCb] & 0xFF;
+        int Cb = bytes[offCrCb + 1] & 0xFF;
+        return convertYCrCbToRgb(Y, Cr, Cb);
     }
 }
