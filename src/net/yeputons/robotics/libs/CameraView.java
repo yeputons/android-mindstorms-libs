@@ -117,9 +117,11 @@ public class CameraView extends ViewGroup {
                 }
 
 
+                // Please note that CameraData's constructor automatically
+                // adjusts getWidth()/getHeight() order based on currendDataRotation
                 cameraData = new CameraData(width, height, currentDataRotation);
                 if (listener != null)
-                    listener.onSizeChange(width, height, cameraDisplayOrientation);
+                    listener.onSizeChange(bitmapWidth, bitmapHeight, cameraDisplayOrientation);
 
                 // to avoid 'drawing recycled bitmap' error, if
                 // drawer is re-drawed before new camera frame
