@@ -120,6 +120,10 @@ public class CameraView extends ViewGroup {
                 cameraData = new CameraData(width, height, currentDataRotation);
                 if (listener != null)
                     listener.onSizeChange(width, height, cameraDisplayOrientation);
+
+                // to avoid 'drawing recycled bitmap' error, if
+                // drawer is re-drawed before new camera frame
+                drawer.setBitmapAndMatrix(toDraw, drawMatrix);
             }
         });
     }
