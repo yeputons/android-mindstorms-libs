@@ -16,11 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class NxtBluetoothController {
-    public interface MessageWriteListener {
-        public void onMessageWrite(NxtBluetoothController controller, byte[] message);
-    }
-
+public class NxtBluetoothController extends NxtAbstractController {
     public static BluetoothDevice findDeviceByName(String name) {
         BluetoothAdapter adapter;
         adapter = BluetoothAdapter.getDefaultAdapter();
@@ -44,24 +40,18 @@ public class NxtBluetoothController {
     }
 
     final protected UUID NXT_SERVER_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // NXT's server UUID
-    final public int MAX_DIRECT_COMMAND_LENGTH = 64;
 
     protected BluetoothDevice mBtDevice;
     protected BluetoothSocket mSocket;
     protected Thread mListenerThread;
     protected ArrayList<BlockingQueue<byte[]>> receivedResponses;
-    private boolean mIsConnected;
-    protected MessageWriteListener mMessageWriteListener = null;
 
     public NxtBluetoothController(BluetoothDevice btDevice) {
+        super();
         mBtDevice = btDevice;
-        mIsConnected = false;
     }
 
-    public void setMessageWriteListener(MessageWriteListener listener) {
-        mMessageWriteListener = listener;
-    }
-
+    @Override
     public synchronized void connect() throws IOException {
         if (isConnected())
             throw new IllegalStateException("Already connected");
@@ -85,6 +75,7 @@ public class NxtBluetoothController {
         mListenerThread.start();
     }
 
+    @Override
     public synchronized void disconnect() {
         if (!isConnected())
             throw new IllegalStateException("Not connected");
@@ -101,10 +92,6 @@ public class NxtBluetoothController {
         }
         mSocket = null;
         receivedResponses = null;
-    }
-
-    public boolean isConnected() {
-        return mIsConnected;
     }
 
     static private void readBytes(InputStream stream, byte[] buffer, int len) throws IOException {
@@ -160,10 +147,9 @@ public class NxtBluetoothController {
         }
     }
 
-    ;
-
     private final byte[] toSend = new byte[MAX_DIRECT_COMMAND_LENGTH + 2];
 
+    @Override
     public byte[] sendDirectCommand(byte[] command) throws IOException, InterruptedException {
         if (!isConnected())
             throw new IllegalStateException("Not connected");
